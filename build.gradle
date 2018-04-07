@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'groovy'
     id 'application'
+	id 'eclipse'
 }
 
 sourceCompatibility = 1.8
@@ -42,6 +43,22 @@ dependencies {
     compileOnly "commons-io:commons-io:2.5"
     compileOnly "org.apache.commons:commons-collections4:4.1"
     compileOnly "commons-codec:commons-codec:1.9"
-
+    
+    compile "com.google.http-client:google-http-client:1.23.0"
+    compile "com.google.http-client:google-http-client-jackson:1.23.0"
 }
 
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+	group 'build'
+	description 'Create a single Jar with all dependencies'
+	manifest {
+		attributes 'Implementation-Title': 'Shell Executor',
+			'Implementation-Version': version,
+			'Main-Class': 'com.workato.onprem.extensions.controller.ShellExecutor'
+	}
+	baseName = project.name + '-all'
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	// from { configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) } }
+	with jar
+}
