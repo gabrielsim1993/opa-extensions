@@ -1,8 +1,14 @@
 package com.workato.onprem.extensions.controller;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
@@ -19,6 +25,8 @@ import com.google.api.client.util.ExponentialBackOff;
 import com.workato.onprem.extensions.model.ExecutionResult;
 
 public class ShellExecutionRunnable implements Runnable {
+	public static File logsDirectory = new File("./shell-logs");
+	
 	private String fileLocation;
 	private GenericUrl returnURL;
 	private HttpTransport HTTP_TRANSPORT;
@@ -32,12 +40,8 @@ public class ShellExecutionRunnable implements Runnable {
 			String[] fullCommand = (String[])ArrayUtils.addAll(baseCommand, params);
 			Process pr = rt.exec(fullCommand);
 
-			StringBuilder result = new StringBuilder();
-			BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			String line = "";
-			while ((line = input.readLine()) != null) {
-				result.append(System.lineSeparator() + line);
-			}
+			String result = shellLogger(pr.getInputStream());
+			
 			String bytesEncoded = Base64.encodeBase64String(result.toString().getBytes());
 			ExecutionResult er = new ExecutionResult(executionId, bytesEncoded);
 			sendHTTPResponse(er);
@@ -45,6 +49,27 @@ public class ShellExecutionRunnable implements Runnable {
 			System.out.println(e.toString());
 			e.printStackTrace();
 		}
+	}
+	
+	private String shellLogger(InputStream in) throws IOException {
+		// create directory to write logs to if it doesn't exist
+		logsDirectory.mkdir();
+		
+		File fileInDirectory = new File(logsDirectory, String.format("%s.log", executionId));
+		
+		StringBuilder result = new StringBuilder();
+		BufferedReader input = new BufferedReader(new InputStreamReader(in));
+		String line = "";
+		
+		PrintWriter writer = new PrintWriter(fileInDirectory, "UTF-8");
+		while ((line = input.readLine()) != null) {
+			result.append(line + System.lineSeparator());
+			writer.println(line);
+			writer.flush();
+		}
+		writer.close();
+		
+		return result.toString();
 	}
 
 	public ShellExecutionRunnable(String executionId, String input, String returnURL, HttpTransport HTTP_TRANSPORT, String[] params) {

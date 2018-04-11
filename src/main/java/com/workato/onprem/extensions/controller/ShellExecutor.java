@@ -1,5 +1,8 @@
 package com.workato.onprem.extensions.controller;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +30,27 @@ public class ShellExecutor {
 	private Environment env;
 	private ExecutionDaoImpl executionDao = new ExecutionDaoImpl();
 	private ObjectMapper mapper = new ObjectMapper();
-	
+
+	@RequestMapping(path = "/execution/{executionId}/logs", method = RequestMethod.GET)
+	public @ResponseBody String getExecutionLogs(@PathVariable(value = "executionId") String executionId)
+			throws Exception {
+		try {
+			File fileInDirectory = new File(ShellExecutionRunnable.logsDirectory, String.format("%s.log", executionId));
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(fileInDirectory));
+			StringBuilder data = new StringBuilder();
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				data.append(line + System.lineSeparator());
+			}
+			bufferedReader.close();
+
+			return data.toString();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			throw e;
+		}
+	}
+
 	@RequestMapping(path = "/execution/{executionId}", method = RequestMethod.GET)
 	public @ResponseBody String getExecutionStatus(@PathVariable(value = "executionId") String executionId)
 			throws Exception {
@@ -71,12 +94,12 @@ public class ShellExecutor {
 			invalidCmd.put("error", "file_location is not specified");
 			return invalidCmd;
 		}
-		
+
 		// Validate params
 		String[] params = new String[] {};
 		if (input.get("params") != null) {
 			if (input.get("params") instanceof String) {
-				params = new String[] {(String) input.get("params")};
+				params = new String[] { (String) input.get("params") };
 			} else if (input.get("params") instanceof ArrayList) {
 				@SuppressWarnings("unchecked")
 				ArrayList<String> p = (ArrayList<String>) input.get("params");
