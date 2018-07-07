@@ -1,11 +1,16 @@
 package com.workato.onprem.extensions.excel;
 
 public class CellItem {
-	int colIndex;
-	String value;
+	/*
+	 * c - columnIndex
+	 * v - value
+	 * Singular character keys minimize response payload
+	 */
+	int c;
+	String v;
 	
 	public CellItem(int colIndex, String value) {
-		this.colIndex = colIndex;
-		this.value = value;
+		this.c = colIndex;
+		this.v = value;
 	}
 }

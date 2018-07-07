@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2018 Workato, Inc. All rights reserved.
+ */
 package com.workato.onprem.extensions.excel;
 
 import java.io.File;
@@ -22,27 +25,29 @@ import com.monitorjbl.xlsx.StreamingReader;
 
 public class ExcelParser {
 
-	final static Logger logger = LoggerFactory.getLogger(ExcelParser.class);
+	private final static Logger LOG = LoggerFactory.getLogger(ExcelParser.class);
 
+	/*
 	public static void main(String[] args) throws FileNotFoundException, IOException, InvalidFormatException {	
-//		final long startTime = System.currentTimeMillis();
-//	
-//		logger.info("Working Directory = " +
-//	              System.getProperty("user.dir"));
-//		
-//		InputStream is = new FileInputStream(new File("WITS.xlsx"));
-//		Workbook workbook = StreamingReader.builder()
-//		        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
-//		        .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-//		        .open(is);            // InputStream or File for XLSX file (required)
-//		
-//		System.out.println("Done");
-//		workbook.close();
-//		
-//		final long endTime = System.currentTimeMillis();
-//
-//		logger.info("Total execution time: " + (endTime - startTime)/1000 + "s.");
+		final long startTime = System.currentTimeMillis();
+	
+		logger.info("Working Directory = " +
+	              System.getProperty("user.dir"));
+		
+		InputStream is = new FileInputStream(new File("WITS.xlsx"));
+		Workbook workbook = StreamingReader.builder()
+		        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
+		        .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
+		        .open(is);            // InputStream or File for XLSX file (required)
+		
+		System.out.println("Done");
+		workbook.close();
+		
+		final long endTime = System.currentTimeMillis();
+
+		logger.info("Total execution time: " + (endTime - startTime)/1000 + "s.");
 	}
+	*/
 	
 	public static String parseExcelByPath(String filepath, int sheetIndex, int offset, int batchSize) throws FileNotFoundException{
 		InputStream is = new FileInputStream(new File(filepath));
@@ -103,7 +108,7 @@ public class ExcelParser {
 									cellValue = c.getStringCellValue();
 								}
 								catch (Exception e) {
-									logger.error("Error deciphering formula at Cell " + c.getAddress());
+									LOG.error("Error deciphering formula at Cell " + c.getAddress());
 									cellValue = "";
 								}
 							}
@@ -116,7 +121,7 @@ public class ExcelParser {
 						break;
 					default:
 						cellValue = "";
-						logger.error("Error deciphering type at Cell " + c.getAddress());
+						LOG.error("Error deciphering type at Cell " + c.getAddress());
 						break;
 				}
 				columns.add(new CellItem(c.getColumnIndex(), cellValue));
