@@ -73,6 +73,26 @@ public class ExcelController {
     	}
     }
     
+    @RequestMapping(path = "/parseExcelMetadataByPath", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity<String> parseExcelMetadataByPath(@RequestBody Map<String, Object> body) {
+    	try {
+    		LOG.info(body.toString());
+    		
+        	Assert.notNull(body.get("filepath"), "Missing filepath");
+        	
+            String filepath = (String) body.get("filepath");
+            
+            String jsonResponse = ExcelParser.parseExcelMetadataByPath(filepath);
+
+    		return new ResponseEntity<String>(jsonResponse, HttpStatus.OK);
+            
+    	} 
+    	catch (Exception e) {
+    		e.printStackTrace();
+    		return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    	}
+    }
+    
     @RequestMapping(path = "/ping", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity<String> ping() {
     	return new ResponseEntity<>(HttpStatus.OK);
