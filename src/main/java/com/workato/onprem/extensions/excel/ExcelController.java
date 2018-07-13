@@ -62,9 +62,9 @@ public class ExcelController {
     			throw new Exception("Offset must be at least " + MIN_OFFSET);
     		}
     		
-            String jsonResponse = ExcelParser.parseExcelByPath(filepath, sheetIndex, offset, batchSize);
+            String csvLines = ExcelParser.parseExcelByPath(filepath, sheetIndex, offset, batchSize);
 
-    		return new ResponseEntity<String>(jsonResponse, HttpStatus.OK);
+            return new ResponseEntity<String>(csvLines, HttpStatus.OK);
             
     	} 
     	catch (Exception e) {
